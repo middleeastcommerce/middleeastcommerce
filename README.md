@@ -1,196 +1,142 @@
-# MiddleEastEcommerce - Cross-Chain ERC20 Token with Chainlink CCIP
+# Middle East E-Commerce (ME)
 
-`MiddleEastECommerce` is an ERC20 token designed to support cross-chain bridging using Chainlink's Cross-Chain Interoperability Protocol (CCIP). Built with Solidity and deployed via Foundry, it includes features like minting/burning, a fee mechanism, whitelisting, and monthly mint limits, making it a versatile token for cross-chain applications.
-
-## Token Features
-
-- **ERC20 Compliance**: Standard ERC20 functionality with 18 decimals.
-- **Max Supply**: 420,069,000,000 `ME` tokens.
-- **Initial Mint**: 14% of max supply minted to the admin on deployment.
-- **Monthly Mint Limit**: 1% of max supply can be minted per month.
-- **Burnable**: Tokens can be burned by addresses with the `BURNER_ROLE`.
-- **Fee Mechanism**: 1% transfer fee (100 basis points) applied unless sender or recipient is whitelisted.
-- **Whitelist**: Whitelisted addresses bypass the transfer fee.
-- **Access Control**: Uses OpenZeppelin's `AccessControl` with roles (`MINTER_ROLE`, `BURNER_ROLE`, `DEFAULT_ADMIN_ROLE`).
-- **Cross-Chain Support**: Integrates with Chainlink CCIP for bridging via a `BurnMintTokenPool`.
-
-## Prerequisites
-
-To run this project, you'll need the following tools installed:
-
-- **Foundry**: A fast Ethereum development toolkit.
-- **Git**: For cloning the repository.
-- **An Ethereum-compatible wallet**: With testnet funds (e.g., Sepolia ETH, Arbitrum Sepolia ETH, BSC Testnet BNB).
-- **RPC Endpoints**: Access to testnet RPCs for supported chains (Ethereum Sepolia, Arbitrum Sepolia, BSC Testnet).
-
-## Setup and Deployment Instructions
-
-Follow these steps to set up, deploy, and configure the `MiddleEastECommerce` project.
-
-### 1. Install Foundry
-
-Install Foundry by running the following command:
-
-```bash
-curl -L https://foundry.paradigm.xyz | bash
-```
-
-
-## 2. Update Foundry to the Latest Version
-
-```bash
-foundryup
-```
-
-## 3. Verify the Installation
-
-```bash
-forge --version
-```
-
-## 4. Clone the Repository and Install Dependencies
-
-```bash
-git clone <repository-url>
-cd middleeastcommerce
-forge install
-```
-
-This will fetch OpenZeppelin contracts, Chainlink CCIP contracts, and other dependencies listed in `lib/`.
-
-## 5. Set Up a Foundry Account
-
-Foundry uses accounts to manage private keys securely. To add your wallet to Foundry, use the `cast wallet import` command:
-
-```bash
-cast wallet import defaultKey --private-key <your-private-key>
-```
-
-Replace `<your-private-key>` with your actual private key. This command stores the key in Foundry's keystore (typically at `~/.foundry/keystore/`) under the alias `defaultKey`. You’ll be prompted to set a password—make sure to remember it, as it’s required for signing transactions later.
-
-
-## 6. Compile the Contracts
-
-Compile the Solidity contracts:
-
-```bash
-forge build
-```
-
-Deploy using:
-
-```bash
-forge script script/deploy.s.sol:Deploy --rpc-url https://sepolia.infura.io/v3/<your-infura-key> --account defaultKey --sender YOURAddress --broadcast
-```
-
-You’ll be prompted for the keystore password. This script:
-
-- Deploys the `MiddleEastECommerce` contract.
-- Deploys a `BurnMintTokenPool` for CCIP bridging.
-- Grants `MINTER_ROLE` and `BURNER_ROLE` to the pool.
-- Sets up the CCIP admin and pool in the `TokenAdminRegistry`.
-
-Check the console output for the deployed Token Address and Pool Address.
-
-Repeat this step for other chains (e.g., Arbitrum Sepolia, BSC Testnet) by changing the RPC URL:
-
-```bash
-forge script script/deploy.s.sol:Deploy --rpc-url https://sepolia-rollup.arbitrum.io/rpc --account defaultKey --sender YOURAddress --broadcast
-
-forge script script/deploy.s.sol:Deploy --rpc-url https://data-seed-prebsc-1-s1.binance.org:8545 --account defaultKey --sender YOURAddress --broadcast
-```
-
-Run configuration script:
-
-```bash
-forge script script/configure.s.sol:Configure --rpc-url https://sepolia.infura.io/v3/<your-infura-key> --account defaultKey --sender YOURAddress --broadcast
-```
-
-This script:
-
-- Identifies unconfigured remote chains (e.g., Arbitrum Sepolia, BSC Testnet).
-- Calls `applyChainUpdates` on the pool to link it with remote pools and tokens.
-
-Repeat for each deployed chain:
-
-```bash
-forge script script/configure.s.sol:Configure --rpc-url https://sepolia-rollup.arbitrum.io/rpc --account defaultKey --sender YOURAddress --broadcast
-
-forge script script/configure.s.sol:Configure --rpc-url https://data-seed-prebsc-1-s1.binance.org:8545 --account defaultKey --sender YOURAddress --broadcast
-```
-
-Configuration logs show remote chains added successfully.
-
-##  Interact with Contracts Using `cast`
-
-```bash
-cast call <token-address> "totalSupply()" --rpc-url https://sepolia.infura.io/v3/<your-infura-key>
-
-cast call <pool-address> "getSupportedChains()" --rpc-url https://sepolia.infura.io/v3/<your-infura-key>
-```
+The **Middle East E-Commerce (ME)** token is the official digital asset powering the **Middle East Commerce** ecosystem — a multi-chain digital marketplace connecting regional and international businesses across the Middle East، and all seven continents.
+It enables transparent, fast, and secure transactions for trade, services, advertising, and in-app utilities within the Middle East Commerce platform.
 
 ---
 
-## Adding a New Chain in the Future
+## 🔗 Official Links
 
-To extend `MiddleEastECommerce` to a new chain (e.g., `UnichainSepolia`), follow these steps:
-
-```solidity
-networks.push(NetworkDetails({
-    name: "UnichainSepolia",
-    chainId: 1301,
-    chainSelector: helperConfig.getUnichainSepoliaConfig().chainSelector,
-    routerAddress: helperConfig.getUnichainSepoliaConfig().router,
-    linkAddress: helperConfig.getUnichainSepoliaConfig().link,
-    rmnProxyAddress: helperConfig.getUnichainSepoliaConfig().rmnProxy,
-    tokenAdminRegistryAddress: helperConfig.getUnichainSepoliaConfig().tokenAdminRegistry,
-    registryModuleOwnerCustomAddress: helperConfig.getUnichainSepoliaConfig().registryModuleOwnerCustom,
-    token: address(0), // Updated after deployment
-    pool: address(0)   // Updated after deployment
-}));
-```
-
-Update `HelperConfig.s.sol` with the new chain's configuration if not already present.
-
-### 2. Deploy to the New Chain
-
-Deploy the token and pool to the new chain:
-
-```bash
-forge script script/deploy.s.sol:Deploy --rpc-url https://rpc.unichain-sepolia.example --account defaultKey --sender YOURAddress --broadcast
-```
-
-Note the new token and pool addresses from the console output.
-
-### 3. Update Existing Chains
-
-Update the `networks` array in `BaseScript.s.sol` with the new chain's deployed addresses (replace the `address(0)` placeholders).
-
-Reconfigure existing pools to recognize the new chain:
-
-```bash
-forge script script/configure.s.sol:Configure --rpc-url https://sepolia.infura.io/v3/<your-infura-key> --account defaultKey --sender YOURAddress --broadcast
-
-forge script script/configure.s.sol:Configure --rpc-url https://sepolia-rollup.arbitrum.io/rpc --account defaultKey --sender YOURAddress --broadcast
-
-forge script script/configure.s.sol:Configure --rpc-url https://data-seed-prebsc-1-s1.binance.org:8545 --account defaultKey --sender YOURAddress --broadcast
-
-forge script script/configure.s.sol:Configure --rpc-url https://rpc.unichain-sepolia.example --account defaultKey --sender YOURAddress --broadcast
-```
-
-Verify supported chains:
-
-```bash
-cast call <pool-address> "getSupportedChains()" --rpc-url https://rpc.unichain-sepolia.example
-```
+* [Website](https://www.middleeastcommerce.net/)
+* [Whitepaper](https://github.com/middleeastcommerce/middleeastcommerce/blob/main/MiddleEast_ME_Whitepaper.pdf)
+* **Smart Contract (Ethereum):** `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b`
+* **Etherscan:** [View on Etherscan](https://etherscan.io/token/0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b)
+* **Launch Date (TGE):** April 3, 2025
 
 ---
 
-## Troubleshooting
+## 🪙 Token Overview
 
-- **Deployment Fails:** Check gas limits, RPC connectivity, and sufficient testnet funds.
-- **Configuration Fails:** Verify chain selectors, pool addresses, and router compatibility in logs.
-- **Keystore Issues:** Ensure the correct password and account alias are used.
-- **Logs:** Use `console.log` outputs in scripts to debug.
+| Attribute | Details |
+| :--- | :--- |
+| **Token Name** | Middle East E-Commerce |
+| **Symbol** | ME |
+| **Type** | Utility & Investment Token |
+| **Standard** | ERC-20 (EVM Compatible) |
+| **Decimals** | 18 |
+| **Max Supply**| 420,069,000,000 ME |
+| **Initial Minting**| 14% (≈58 billion ME) |
+| **Currently Minted** | 58 billion ME |
+| **Monthly Mint Limit**| 1% of total supply (optional; not active yet) |
+| **Admin Control**| Admin can assign mint/burn roles and whitelist wallets |
+| **Transfer Fee**| 1% fixed on transfers between users |
+| **Whitelist Feature**| Exempt wallets from transfer fees |
+| **Blacklist Feature**| Not implemented |
 
 ---
+
+## 🛠️ Token Utility & Use Cases
+
+The ME token functions as both a tradable digital asset and a utility token within the Middle East Commerce ecosystem.
+
+* **E-Commerce:** Used for product and service payments.
+* **Advertising & Promotion:** For sponsored listings, banner ads, and boosted visibility.
+* **Gaming Integration:** Unlock new levels and features in the *“Echoes of Time”* adventure game.
+* **Platform Subscriptions:** Access premium business and marketing tools.
+* **Ecosystem Operations:** Transaction fees and marketplace services.
+
+A user who wishes to open a store and sell products on the platform can pay the subscription fee using the platform’s token or via bank card, with flexible subscription options of one month, three months, six months, nine months, or one full year.
+
+---
+
+## 📊 Tokenomics (Verified Model)
+
+The ME token operates under a fixed-supply, non-inflationary model.
+
+All project operations and liquidity are self-funded by the founder, ensuring transparency and long-term market stability.
+
+Unlike traditional token allocations, the ME project is entirely self-funded by its founder.
+
+No token-based compensation, vesting schedules, or internal allocations have been issued.
+
+All project expenses — including development, marketing, and salaries — are personally funded by the founder to ensure transparency and fair market stability.
+
+---
+
+## ⛓️ Multi-Chain Deployment
+
+The ME token is deployed across multiple blockchains for accessibility, scalability, and interoperability.
+
+| Blockchain | Token Address | Pool Address |
+| :--- | :--- | :--- |
+| **Ethereum Mainnet** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **BNB Chain (Mainnet)** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **Polygon (Mainnet)** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **Avalanche (C-Chain)** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **Celo Mainnet** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **Ronin Mainnet** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **Sei Mainnet** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **Arbitrum One** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D1iOS58f2A386D6F2380eB` |
+| **Optimism** | `0xCC0cBC7aad6E89fFbE5028dEa24Dd80DDeb8455b` | `0x5Acf8cdF7740DaBfF6D115058f2A386D6F2380eB` |
+| **Metis Mainnet** | `0x21787760Aa5e2E092bed3833fc51fa3a5694B484` | `0x02d46C692b8f78c085604E54ba885c5385055423` |
+
+---
+
+## 📈 Exchange Listings & Trading Pairs
+
+| Exchange | Trading Pair |
+| :--- | :--- |
+| **Uniswap** | ME/ETH, ME/OP, ME/USDT, ME/BNB, ME/ARB |
+| **PancakeSwap** | ME/BUSD |
+| **Trader Joe (Avalanche)** | AVAX/ME |
+| **QuickSwap (Polygon)** | MATIC/ME |
+| **SushiSwap** | ME/ETH |
+| **DODOex** | ME/ETH |
+| **ShibaSwap** | ME/ETH |
+| **Camelot Exchange (Arbitrum)**| ME/ARB |
+| **Ubeswap (Celo)** | CELO/ME |
+| **Hercules Exchange (Metis)**| METIS/ME |
+| **Ronin Swap** | ME/RON |
+| **DragonSwap (Sei)** | SEI/ME |
+
+---
+
+## 👥 Team
+
+### Core Leadership
+* **Khaled Alshaar** – CEO / Project Director
+* **Layla Tawil** – Deputy CEO
+* **Ibrahim Anjro** – Operations Manager
+* **Abdelrhman Abdulaziz** – Token Manager / Blockchain Specialist
+
+### Team Members
+* Waleed Albarghouthi, Bashar Madani, Maen Mohammad, Mohammd Mousa, Bilal Mardini, Abdalrahman Alkateb, Aya Tawil, Rama Safi, Munib Saleh Mohammad, Elfat Hetawy, Mohammad Sobhi Shahid, Zakaria Zhlat, Mohamad Rafat Khoder, Mohamad Shaban, Wedad Ahmad Joulaq, Abdullatif mohamed abdullatif asker, Afaf Tawil, , Chibane Mohamed Anis, Saleh Lala, Yahya Loulou.
+
+### Locations
+* **Headquarters:** Sultanate of Oman
+* **Countries:** Lebanon, Germany, Turkey, Jordan, Egypt, Syria
+
+---
+
+## 🗺️ Roadmap
+
+| Year | Milestones |
+| :--- | :--- |
+| **2025** | Token & website launch, DEX deployments, marketplace activation, app development |
+| **2026** | CEX listings, AI personalization, ME payment gateway, smart wallets |
+| **2027** | Regional partnerships (، and all seven continents), NFT marketplace, DeFi tools, premium memberships |
+| **2028** | ME Venture Fund, governance system, VR commerce integration |
+
+Utilizing the token for subscriptions by users who wish to open stores and access instant translated calls, enabling seamless communication and business expansion within the platform.
+
+---
+
+## ⚖️ Disclaimer
+
+The ME token is an investable and tradable digital asset, designed to function both as a utility and an investment instrument within the Middle East Commerce ecosystem.
+
+It can be used for marketing, promotions, and advertising, as well as for purchasing products, equipment, and unlocking new levels or features within the integrated gaming platform.
+
+---
+
+© 2025 **Middle East E-Commerce (ME)** — All Rights Reserved.
